@@ -3,19 +3,21 @@ DHCP starvation attack is an attack that targets DHCP servers whereby forged DHC
 
 to run the attack you should simply run
 ```
-sudo python dhcpStarvation.py
+python dhcpStarvation.py
 ```
+
+If it doesn't run try adding ```sudo``` before the command
 
 However, there are some optional options you could add:
 
-```sudo python dhcpStarvation.py -p``` or ```sudo python dhcpStarvation.py --persistent```
+```python dhcpStarvation.py -p``` or ```python dhcpStarvation.py --persistent```
 for a persistent attack, the default attack is temporary
 
 
-```sudo python dhcpStarvation.py -t [TARGET SERVER IP]``` or ```sudo python dhcpStarvation.py --target [TARGET SERVER IP]```
+```python dhcpStarvation.py -t [TARGET SERVER IP]``` or ```python dhcpStarvation.py --target [TARGET SERVER IP]```
 for an attack on a specific server on the network, the default attack is on the first server to reply
 
-```sudo python dhcpStarvation.py -i [NETWORK INTERFACE]``` or ```sudo python dhcpStarvation.py --iface [NETWORK INTERFACE]```
+```python dhcpStarvation.py -i [NETWORK INTERFACE]``` or ```python dhcpStarvation.py --iface [NETWORK INTERFACE]```
 for an attack from a specific network interface (depands on the attackers device), the default attack if from the default interface of your system
 
 
